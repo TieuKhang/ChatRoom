@@ -25,6 +25,12 @@ body {
   box-sizing: border-box;
 }
 
+.textSearch {
+  margin-top:80px;
+  position:fixed;
+  height:5%;
+  width:47.5%;
+}
 .App section {
   display: flex;
   flex-direction: column;

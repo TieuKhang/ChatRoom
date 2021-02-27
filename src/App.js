@@ -1,10 +1,13 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState} from 'react';
 import './App.css';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 import 'firebase/auth';
 import {useAuthState} from 'react-firebase-hooks/auth';
 import {useCollectionData} from 'react-firebase-hooks/firestore';
+import AsyncSelect from 'react-select/async';
+import {Component} from 'react';
+import TextSearch from './component/Textsearch'
 
 firebase.initializeApp({
   apiKey: "AIzaSyAcb60kPfml7kFktuqpND1hENe6dYk0oJ8",
@@ -27,6 +30,9 @@ function App() {
         <h1>⚛️🔥💬</h1>
         <SignOut />
       </header>
+      <div className="textSearch">
+        <TextSearch client={firestore}/>
+      </div>
       <section>
         {user? <ChatRoom /> : <SignIn />}
       </section>
@@ -63,7 +69,8 @@ function ChatRoom() {
       text:formValue,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       uid,
-      photoURL
+      photoURL,
+      like:0
     });
     setFormValue('');
     dummy.current.scrollIntoView({ behavior: 'smooth' });
@@ -72,7 +79,7 @@ function ChatRoom() {
   return(
     <>
       <div>
-        {msg && msg.map(par => <ChatMsg key={par.id} message={par} />)}
+        {msg && msg.map(par => <ChatMsg key={par.id} message={par} idVal={par.id}/>)}
         <span ref={dummy}></span>
       </div>
       <form onSubmit={sendMsg}>
@@ -84,16 +91,25 @@ function ChatRoom() {
 }
 
 function ChatMsg(props){
-  const {text, uid, photo} = props.message;
+  const {text, uid, photo, like, idField} = props.message;
+  const id = props.idVal;
   const msgClass = uid === auth.currentUser.uid ? 'sent' : 'received';
+  const [likenum, setLike] = useState(like);
+  const updateLike = () => {
+    setLike(likenum+1);
+    firestore.collection("messages").doc(id).update({like: likenum})
+  }
   return (
     <>
       <div className={`message ${msgClass}`}>
         <img src = {photo || 'https://icons-for-free.com/iconfiles/png/512/avatar+human+man+profile+icon-1320085876716628234.png'}/>
         <p>{text}</p>
+        <button onClick={updateLike}>Likes: {likenum}</button>
       </div>
     </>
   )
 }
+
+
 
 export default App;
